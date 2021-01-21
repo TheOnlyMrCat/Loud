@@ -1,8 +1,8 @@
 use cpal::traits::*;
 
 use crate::graphics::{GraphicsHandler, Image, Vector2};
+use crate::node::WorkbenchNode;
 use crate::input::{InputHandler, InputState, MouseButton};
-use crate::node::Node;
 
 use sdl2::event::Event;
 use sdl2::pixels::Color;
@@ -31,9 +31,10 @@ fn main() {
 	// let mut audio_stream = audio::AudioStream::with_device(default_device).unwrap();
 
 	let mut nodes = vec![
-		Node {
+		WorkbenchNode {
 			pos: Vector2::new(0, 0),
 			parents: Vec::new(),
+			node: Box::new(node::EmptyNode),
 		},
 	];
 	let mut camera_pos = Vector2::origin();
