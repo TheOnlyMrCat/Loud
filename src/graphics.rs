@@ -65,13 +65,18 @@ impl GraphicsHandler {
 	}
 
 	pub fn render(&mut self, image: &Image, pos: Vector2) {
+		let texture = self.sprite_cache.get(&image.render()).unwrap();
+		self.render_scaled(image, Self::get_bounds(texture, pos))
+	}
+
+	pub fn render_scaled(&mut self, image: &Image, bound: Rect) {
 		let path = image.render();
 		if !self.sprite_cache.contains_key(&path) {
 			self.sprite_cache.insert(path.clone(), self.canvas.texture_creator().load_texture(path.clone()).unwrap());
 		}
 
 		let texture = self.sprite_cache.get(&path).unwrap();
-		self.canvas.copy(texture, None, Self::get_bounds(texture, pos)).unwrap();
+		self.canvas.copy(texture, None, bound).unwrap();
 	}
 
 	pub fn render_text(&mut self, text: &Text, pos: Vector2) {
