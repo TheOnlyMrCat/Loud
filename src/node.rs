@@ -12,6 +12,7 @@ pub struct NodeConnection {
 }
 
 pub trait Node {
+	fn title(&self) -> String;
 	fn inputs(&self) -> Vec<String>;
 	fn outputs(&self) -> Vec<String>;
 
@@ -21,6 +22,10 @@ pub trait Node {
 
 pub struct EmptyNode;
 impl Node for EmptyNode {
+	fn title(&self) -> String {
+		"Empty".to_owned()
+	}
+
 	fn inputs(&self) -> Vec<String> {
 		Vec::new()
 	}

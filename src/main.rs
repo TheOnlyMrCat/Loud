@@ -1,6 +1,6 @@
 use cpal::traits::*;
 
-use crate::graphics::{GraphicsHandler, Image, Vector2};
+use crate::graphics::{GraphicsHandler, Image, Text, Vector2};
 use crate::node::WorkbenchNode;
 use crate::input::{InputHandler, InputState, MouseButton};
 
@@ -88,6 +88,12 @@ fn main() {
 		for node in nodes.iter() {
 			graphics.canvas.set_draw_color(Color::RGB(200, 200, 200));
 			graphics.canvas.fill_rect(Rect::new(node.pos.x - camera_pos.x, node.pos.y + TOOL_SIZE as i32 - camera_pos.y, NODE_WIDTH, NODE_HEIGHT)).unwrap();
+			graphics.render_text(&Text {
+				text: node.node.title(),
+				font_path: "res/NotoSansJP-Regular.otf".to_owned(),
+				size: 24,
+				color: Color::BLACK,
+			}, Vector2::new(node.pos.x - camera_pos.x, node.pos.y + TOOL_SIZE as i32 - camera_pos.y));
 		}
 
 		// Render tool bar
