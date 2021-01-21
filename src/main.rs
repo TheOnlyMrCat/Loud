@@ -14,6 +14,7 @@ mod graphics;
 mod input;
 mod node;
 
+const GRID_SIZE: i32 = 16;
 const TOOL_SIZE: u32 = 32;
 const NODE_HEIGHT: u32 = 256;			// TODO get rid of this when node contents have proper implementations
 const NODE_WIDTH: u32 = 256;
@@ -42,7 +43,7 @@ fn main() {
 	let mut camera_pos = Vector2::origin();
 
 	while running {
-		graphics.canvas.set_draw_color(Color::BLACK);//RGB(0x0b, 0x43, 0x78));
+		graphics.canvas.set_draw_color(Color::RGB(0x0b, 0x43, 0x78));
 		graphics.canvas.clear();
 		input.update();
 
@@ -76,10 +77,10 @@ fn main() {
 		}
 
 		// Render gridlines
-		graphics.canvas.set_draw_color(Color::RGB(60, 60, 120));
-		for x in -1 .. (canvas_size.0 as i32 / 32 + 2) {
-			for y in -1 .. (canvas_size.1 as i32 / 32 + 2) {
-				graphics.canvas.draw_rect(Rect::new(x * 32 - camera_pos.x % 32, y * 32 - camera_pos.y % 32, 32, 32)).unwrap();
+		graphics.canvas.set_draw_color(Color::RGB(0x0b, 0x23, 0x55));
+		for x in -1 .. (canvas_size.0 as i32 / GRID_SIZE + 2) {
+			for y in -1 .. (canvas_size.1 as i32 / GRID_SIZE + 2) {
+				graphics.canvas.draw_rect(Rect::new(x * GRID_SIZE - camera_pos.x % GRID_SIZE, y * GRID_SIZE - camera_pos.y % GRID_SIZE, GRID_SIZE as u32, GRID_SIZE as u32)).unwrap();
 			}
 		}
 
