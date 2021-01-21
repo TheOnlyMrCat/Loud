@@ -1,7 +1,7 @@
 use cpal::traits::*;
 
 use crate::graphics::{GraphicsHandler, Image, Vector2};
-use crate::input::InputHandler;
+use crate::input::{InputHandler, InputState, MouseButton};
 use crate::node::Node;
 
 use sdl2::event::Event;
@@ -36,17 +36,36 @@ fn main() {
 			parents: Vec::new(),
 		},
 	];
+	let mut camera_pos = Vector2::origin();
 
 	while running {
 		graphics.canvas.set_draw_color(Color::RGB(0x0b, 0x43, 0x78));
 		graphics.canvas.clear();
+		input.update();
+
+		for event in event_pump.poll_iter() {
+			match event {
+				Event::KeyDown { .. } | Event::KeyUp { .. } |
+				Event::MouseButtonDown { .. } | Event::MouseButtonUp { .. } |
+				Event::MouseMotion { .. } => {
+					input.event(event);
+				}
+				Event::Quit { .. } => { running = false },
+				_ => {},
+			}
+		}
 
 		let canvas_size = graphics.canvas.output_size().unwrap();
+
+		// Mouse motion
+		if input.button_is(MouseButton::Left, InputState::Down) {
+			camera_pos -= input.mouse_motion;
+		}
 
 		// Render nodes
 		for node in nodes.iter() {
 			graphics.canvas.set_draw_color(Color::RGB(200, 200, 200));
-			graphics.canvas.fill_rect(Rect::new(node.pos.x, node.pos.y + TOOL_SIZE as i32, 256, 256)).unwrap();
+			graphics.canvas.fill_rect(Rect::new(node.pos.x - camera_pos.x, node.pos.y + TOOL_SIZE as i32 - camera_pos.y, 256, 256)).unwrap();
 		}
 
 		// Render tool bar
@@ -54,16 +73,6 @@ fn main() {
 		graphics.canvas.fill_rect(Rect::new(0, 0, canvas_size.0, 32)).unwrap();
 		graphics.render_scaled(&Image::Sprite("res/toolbar/add_project.png".to_owned()), Rect::new(0, 0, TOOL_SIZE, TOOL_SIZE));
 		graphics.render_scaled(&Image::Sprite("res/toolbar/add_mic.png".to_owned()), Rect::new(32, 0, TOOL_SIZE, TOOL_SIZE));
-
-		for event in event_pump.poll_iter() {
-			match event {
-				Event::KeyDown { .. } | Event::KeyUp { .. } |
-				Event::MouseButtonDown { .. } | Event::MouseButtonUp { .. } |
-				Event::MouseMotion { .. } => { input.event(event) }
-				Event::Quit { .. } => { running = false },
-				_ => {},
-			}
-		}
 
 		graphics.canvas.present();
 	}

@@ -18,6 +18,7 @@ pub struct InputHandler {
 	buttons_pressed: HashMap<MouseButton, bool>,
 
 	pub mouse_pos: Vector2,
+	pub mouse_motion: Vector2,
 }
 
 impl InputHandler {
@@ -30,6 +31,7 @@ impl InputHandler {
 			buttons_pressed: HashMap::new(),
 
 			mouse_pos: Vector2::origin(),
+			mouse_motion: Vector2::origin(),
 		}
 	}
 	
@@ -49,8 +51,9 @@ impl InputHandler {
 			Event::MouseButtonUp { mouse_btn, .. } => {
 				self.buttons_down.insert(mouse_btn, false);
 			}
-			Event::MouseMotion { x, y, .. } => {
+			Event::MouseMotion { x, y, xrel, yrel, .. } => {
 				self.mouse_pos = Vector2::new(x, y);
+				self.mouse_motion = Vector2::new(xrel, yrel);
 			}
 			_ => unreachable!()			// Other functions will never be passed
 		}
@@ -59,6 +62,7 @@ impl InputHandler {
 	pub fn update(&mut self) {
 		self.keys_pressed.clear();
 		self.buttons_pressed.clear();
+		self.mouse_motion = Vector2::origin();
 	}
 
 	pub fn key_is(&self, key: Scancode, state: InputState) -> bool {

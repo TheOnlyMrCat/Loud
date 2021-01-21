@@ -6,6 +6,7 @@ use sdl2::render::{Texture, WindowCanvas};
 use sdl2::ttf::Sdl2TtfContext;
 
 use std::collections::HashMap;
+use std::ops::{Sub, SubAssign};
 
 #[derive(Clone, Copy)]
 pub struct Vector2 {
@@ -40,6 +41,23 @@ impl Vector2 {
 		self.x < bounds.x + bounds.w &&
 		self.y > bounds.y &&
 		self.y < bounds.y + bounds.h
+	}
+}
+
+impl SubAssign for Vector2 {
+	fn sub_assign(&mut self, rhs: Self) {
+		self.x -= rhs.x;
+		self.y -= rhs.y;
+	}
+}
+
+impl Sub for Vector2 {
+	type Output = Self;
+	fn sub(self, rhs: Self) -> Self {
+		Vector2 {
+			x: self.x - rhs.x,
+			y: self.y - rhs.y,
+		}
 	}
 }
 
