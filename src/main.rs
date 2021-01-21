@@ -15,6 +15,8 @@ mod input;
 mod node;
 
 const TOOL_SIZE: u32 = 32;
+const NODE_HEIGHT: u32 = 256;			// TODO get rid of this when node contents have proper implementations
+const NODE_WIDTH: u32 = 256;
 
 fn main() {
 	// Initialising IO
@@ -60,7 +62,17 @@ fn main() {
 
 		// Mouse motion
 		if input.button_is(MouseButton::Left, InputState::Down) {
-			camera_pos -= input.mouse_motion;
+			let mut collided = false;
+			for node in nodes.iter_mut() {
+				if input.mouse_pos.collides(Rect::new(node.pos.x - camera_pos.x, node.pos.y - camera_pos.y, NODE_WIDTH, NODE_HEIGHT)) {
+					collided = true;
+					node.pos += input.mouse_motion;
+					break;
+				}
+			}
+			if !collided {
+				camera_pos -= input.mouse_motion;
+			}
 		}
 
 		// Render gridlines
@@ -74,7 +86,7 @@ fn main() {
 		// Render nodes
 		for node in nodes.iter() {
 			graphics.canvas.set_draw_color(Color::RGB(200, 200, 200));
-			graphics.canvas.fill_rect(Rect::new(node.pos.x - camera_pos.x, node.pos.y + TOOL_SIZE as i32 - camera_pos.y, 256, 256)).unwrap();
+			graphics.canvas.fill_rect(Rect::new(node.pos.x - camera_pos.x, node.pos.y + TOOL_SIZE as i32 - camera_pos.y, NODE_WIDTH, NODE_HEIGHT)).unwrap();
 		}
 
 		// Render tool bar
