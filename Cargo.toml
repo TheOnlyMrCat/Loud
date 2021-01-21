@@ -8,5 +8,5 @@ edition = "2018"
 
 [dependencies]
 cpal = "0.13.1"
-druid = "0.7.0"
 ringbuf = "0.2.2"
+sdl2 = { version = "0.34.3", features = [ "image", "ttf", "unsafe_textures" ]}
