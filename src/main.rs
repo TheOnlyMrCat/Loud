@@ -52,8 +52,8 @@ fn main() {
 		// Render tool bar
 		graphics.canvas.set_draw_color(Color::WHITE);
 		graphics.canvas.fill_rect(Rect::new(0, 0, canvas_size.0, 32)).unwrap();
-		graphics.render_scaled(&Image::Sprite("graphics/toolbar/add_project.png".to_owned()), Rect::new(0, 0, TOOL_SIZE, TOOL_SIZE));
-		graphics.render_scaled(&Image::Sprite("graphics/toolbar/add_mic.png".to_owned()), Rect::new(32, 0, TOOL_SIZE, TOOL_SIZE));
+		graphics.render_scaled(&Image::Sprite("res/toolbar/add_project.png".to_owned()), Rect::new(0, 0, TOOL_SIZE, TOOL_SIZE));
+		graphics.render_scaled(&Image::Sprite("res/toolbar/add_mic.png".to_owned()), Rect::new(32, 0, TOOL_SIZE, TOOL_SIZE));
 
 		for event in event_pump.poll_iter() {
 			match event {
