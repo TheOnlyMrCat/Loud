@@ -39,7 +39,7 @@ fn main() {
 	let mut camera_pos = Vector2::origin();
 
 	while running {
-		graphics.canvas.set_draw_color(Color::RGB(0x0b, 0x43, 0x78));
+		graphics.canvas.set_draw_color(Color::BLACK);//RGB(0x0b, 0x43, 0x78));
 		graphics.canvas.clear();
 		input.update();
 
@@ -60,6 +60,14 @@ fn main() {
 		// Mouse motion
 		if input.button_is(MouseButton::Left, InputState::Down) {
 			camera_pos -= input.mouse_motion;
+		}
+
+		// Render gridlines
+		graphics.canvas.set_draw_color(Color::RGB(60, 60, 120));
+		for x in -1 .. (canvas_size.0 as i32 / 32 + 2) {
+			for y in -1 .. (canvas_size.1 as i32 / 32 + 2) {
+				graphics.canvas.draw_rect(Rect::new(x * 32 - camera_pos.x % 32, y * 32 - camera_pos.y % 32, 32, 32)).unwrap();
+			}
 		}
 
 		// Render nodes
