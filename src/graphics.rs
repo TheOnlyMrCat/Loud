@@ -6,7 +6,7 @@ use sdl2::render::{Texture, WindowCanvas};
 use sdl2::ttf::Sdl2TtfContext;
 
 use std::collections::HashMap;
-use std::ops::{AddAssign, Sub, SubAssign};
+use std::ops::{AddAssign, Div, Mul, Sub, SubAssign};
 
 #[derive(Clone, Copy)]
 pub struct Vector2 {
@@ -48,6 +48,26 @@ impl AddAssign for Vector2 {
 	fn add_assign(&mut self, rhs: Self) {
 		self.x += rhs.x;
 		self.y += rhs.y;
+	}
+}
+
+impl Div for Vector2 {
+	type Output = Self;
+	fn div(self, rhs: Self) -> Self {
+		Vector2 {
+			x: self.x / rhs.x,
+			y: self.y / rhs.y,
+		}
+	}
+}
+
+impl Mul for Vector2 {
+	type Output = Self;
+	fn mul(self, rhs: Self) -> Self {
+		Vector2 {
+			x: self.x * rhs.x,
+			y: self.y * rhs.y,
+		}
 	}
 }
 
