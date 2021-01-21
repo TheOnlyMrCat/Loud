@@ -6,6 +6,10 @@ pub struct Amplifier {
 }
 
 impl Node for Amplifier {
+	fn title(&self) -> String {
+		"Amplifier".to_owned()
+	}
+
 	fn inputs(&self) -> Vec<String> {
 		vec!["".to_owned()]
 	}

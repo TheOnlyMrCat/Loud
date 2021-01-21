@@ -15,6 +15,10 @@ pub enum Waveform {
 }
 
 impl Node for Wave {
+	fn title(&self) -> String {
+		"Wave Generator".to_owned()
+	}
+
 	fn inputs(&self) -> Vec<String> {
 		vec![]
 	}

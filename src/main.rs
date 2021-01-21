@@ -1,6 +1,6 @@
 use cpal::traits::*;
 
-use crate::graphics::{GraphicsHandler, Image, Vector2};
+use crate::graphics::{GraphicsHandler, Image, Text, Vector2};
 use crate::node::WorkbenchNode;
 use crate::input::{InputHandler, InputState, MouseButton};
 
@@ -14,7 +14,10 @@ mod graphics;
 mod input;
 mod node;
 
+const GRID_SIZE: i32 = 16;
 const TOOL_SIZE: u32 = 32;
+const NODE_HEIGHT: u32 = 256;			// TODO get rid of this when node contents have proper implementations
+const NODE_WIDTH: u32 = 256;
 
 fn main() {
 	// Initialising IO
@@ -40,7 +43,7 @@ fn main() {
 	let mut camera_pos = Vector2::origin();
 
 	while running {
-		graphics.canvas.set_draw_color(Color::BLACK);//RGB(0x0b, 0x43, 0x78));
+		graphics.canvas.set_draw_color(Color::RGB(0x0b, 0x43, 0x78));
 		graphics.canvas.clear();
 		input.update();
 
@@ -60,21 +63,37 @@ fn main() {
 
 		// Mouse motion
 		if input.button_is(MouseButton::Left, InputState::Down) {
-			camera_pos -= input.mouse_motion;
+			let mut collided = false;
+			for node in nodes.iter_mut() {
+				if input.mouse_pos.collides(Rect::new(node.pos.x - camera_pos.x, node.pos.y - camera_pos.y, NODE_WIDTH, NODE_HEIGHT)) {
+					collided = true;
+					node.pos += input.mouse_motion;
+					break;
+				}
+			}
+			if !collided {
+				camera_pos -= input.mouse_motion;
+			}
 		}
 
 		// Render gridlines
-		graphics.canvas.set_draw_color(Color::RGB(60, 60, 120));
-		for x in -1 .. (canvas_size.0 as i32 / 32 + 2) {
-			for y in -1 .. (canvas_size.1 as i32 / 32 + 2) {
-				graphics.canvas.draw_rect(Rect::new(x * 32 - camera_pos.x % 32, y * 32 - camera_pos.y % 32, 32, 32)).unwrap();
+		graphics.canvas.set_draw_color(Color::RGB(0x0b, 0x23, 0x55));
+		for x in -1 .. (canvas_size.0 as i32 / GRID_SIZE + 2) {
+			for y in -1 .. (canvas_size.1 as i32 / GRID_SIZE + 2) {
+				graphics.canvas.draw_rect(Rect::new(x * GRID_SIZE - camera_pos.x % GRID_SIZE, y * GRID_SIZE - camera_pos.y % GRID_SIZE, GRID_SIZE as u32, GRID_SIZE as u32)).unwrap();
 			}
 		}
 
 		// Render nodes
 		for node in nodes.iter() {
 			graphics.canvas.set_draw_color(Color::RGB(200, 200, 200));
-			graphics.canvas.fill_rect(Rect::new(node.pos.x - camera_pos.x, node.pos.y + TOOL_SIZE as i32 - camera_pos.y, 256, 256)).unwrap();
+			graphics.canvas.fill_rect(Rect::new(node.pos.x - camera_pos.x, node.pos.y + TOOL_SIZE as i32 - camera_pos.y, NODE_WIDTH, NODE_HEIGHT)).unwrap();
+			graphics.render_text(&Text {
+				text: node.node.title(),
+				font_path: "res/NotoSansJP-Regular.otf".to_owned(),
+				size: 24,
+				color: Color::BLACK,
+			}, Vector2::new(node.pos.x - camera_pos.x, node.pos.y + TOOL_SIZE as i32 - camera_pos.y));
 		}
 
 		// Render tool bar
