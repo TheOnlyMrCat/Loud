@@ -9,4 +9,6 @@ edition = "2018"
 [dependencies]
 cpal = "0.13.1"
 ringbuf = "0.2.2"
-sdl2 = { version = "0.34.3", features = [ "image", "ttf", "unsafe_textures" ]}
+relm = "0.20.0"
+relm-derive = "0.20.0"
+gtk = "0.9.2"

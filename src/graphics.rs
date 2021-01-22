@@ -1,12 +1,17 @@
-pub use sdl2::pixels::Color;
+use relm::{connect, Relm, Update, Widget};
+use gtk::prelude::*;
+use gtk::{Window, Inhibit, WindowType};
+use relm_derive::Msg;
 
-use sdl2::image::LoadTexture;
-use sdl2::rect::Rect;
-use sdl2::render::{Texture, WindowCanvas};
-use sdl2::ttf::Sdl2TtfContext;
-
-use std::collections::HashMap;
 use std::ops::{AddAssign, Div, Mul, Sub, SubAssign};
+
+#[derive(Clone, Copy)]
+pub struct Rect {
+	pub x: i32,
+	pub y: i32,
+	pub w: i32,
+	pub h: i32,
+}
 
 #[derive(Clone, Copy)]
 pub struct Vector2 {
@@ -88,85 +93,78 @@ impl Sub for Vector2 {
 	}
 }
 
-pub struct GraphicsHandler {
-	pub canvas: WindowCanvas,
-	sprite_cache: HashMap<String, Texture>,
-	text_cache: HashMap<Text, Texture>,
-	ttf: Sdl2TtfContext,
+pub struct Model {
+
 }
 
-impl GraphicsHandler {
-	pub fn new(canvas: WindowCanvas) -> Self {
-		Self {
-			canvas,
-			sprite_cache: HashMap::new(),
-			text_cache: HashMap::new(),
-			ttf: sdl2::ttf::init().unwrap(),
+#[derive(Msg)]
+pub enum Msg {
+	Quit,
+}
+
+pub struct Win {
+	model: Model,
+	window: Window,
+}
+
+impl Update for Win {
+	// Specify the model used for this widget.
+	type Model = Model;
+	// Specify the model parameter used to init the model.
+	type ModelParam = ();
+	// Specify the type of the messages sent to the update function.
+	type Msg = Msg;
+
+	// Return the initial model.
+	fn model(_: &Relm<Self>, _: ()) -> Model {
+		Model {
 		}
 	}
 
-	pub fn get_bounds(texture: &Texture, pos: Vector2) -> Rect {
-		Rect::new(pos.x, pos.y, texture.query().width, texture.query().height)
-	}
-
-	pub fn render(&mut self, image: &Image, pos: Vector2) {
-		let texture = self.sprite_cache.get(&image.render()).unwrap();
-		self.render_scaled(image, Self::get_bounds(texture, pos))
-	}
-
-	pub fn render_scaled(&mut self, image: &Image, bound: Rect) {
-		let path = image.render();
-		if !self.sprite_cache.contains_key(&path) {
-			self.sprite_cache.insert(path.clone(), self.canvas.texture_creator().load_texture(path.clone()).unwrap());
-		}
-
-		let texture = self.sprite_cache.get(&path).unwrap();
-		self.canvas.copy(texture, None, bound).unwrap();
-	}
-
-	pub fn render_text(&mut self, text: &Text, pos: Vector2) {
-		if !self.text_cache.contains_key(text) {
-			let font = self.ttf.load_font(text.font_path.clone(), text.size).unwrap();
-			self.text_cache.insert(
-				text.clone(),
-				self.canvas.create_texture_from_surface(font.render(&text.text.to_string()).blended_wrapped(text.color, self.canvas.output_size().unwrap().0).unwrap()).unwrap()
-			);
-		}
-
-		let texture = self.text_cache.get(text).unwrap();
-		self.canvas.copy(texture, None, Self::get_bounds(texture, pos)).unwrap();
-	}
-}
-
-pub enum Image {
-	None,
-	Sprite(String),
-}
-
-impl Image {
-	pub fn render(&self) -> String {
-		match self {
-			Image::None => "".to_owned(),
-			Image::Sprite(path) => path.to_owned(),
+	// The model may be updated when a message is received.
+	// Widgets may also be updated in this function.
+	fn update(&mut self, event: Msg) {
+		match event {
+			Msg::Quit => gtk::main_quit(),
 		}
 	}
 }
 
-#[derive(Eq, Hash, PartialEq)]
-pub struct Text {
-    pub text: String,
-    pub font_path: String,
-    pub size: u16,
-    pub color: Color,
-}
+impl Widget for Win {
+	// Specify the type of the root widget.
+	type Root = Window;
 
-impl Clone for Text {
-	fn clone(&self) -> Self {
-		Self {
-			text: self.text.clone(),
-			font_path: self.font_path.clone(),
-			size: self.size,
-			color: self.color,
+	// Return the root widget.
+	fn root(&self) -> Self::Root {
+		self.window.clone()
+	}
+
+	// Create the widgets.
+	fn view(relm: &Relm<Self>, model: Self::Model) -> Self {
+		// GTK+ widgets are used normally within a `Widget`.
+		let window = Window::new(WindowType::Toplevel);
+		window.resize(1000, 700);
+		window.set_title("Loud");
+
+		let screen_box = gtk::BoxBuilder::new().orientation(gtk::Orientation::Vertical).build();
+		window.add(&screen_box);
+
+		let toolbar = gtk::ButtonBoxBuilder::new().build();
+		screen_box.add(&toolbar);
+
+		let workspace = gtk::DrawingAreaBuilder::new().build();
+		screen_box.add(&workspace);
+
+		// Connect the signal `delete_event` to send the `Quit` message.
+		connect!(relm, window, connect_delete_event(_, _), return (Some(Msg::Quit), Inhibit(false)));
+		// There is also a `connect!()` macro for GTK+ events that do not need a
+		// value to be returned in the callback.
+
+		window.show_all();
+
+		Win {
+			model,
+			window,
 		}
 	}
 }
