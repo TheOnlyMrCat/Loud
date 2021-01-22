@@ -2,7 +2,7 @@ use cpal::traits::*;
 
 use crate::graphics::{GraphicsHandler, Image, Text, Vector2};
 use crate::node::WorkbenchNode;
-use crate::input::{InputHandler, InputState, MouseButton};
+use crate::input::{InputHandler, InputState, MouseButton, Scancode};
 
 use sdl2::event::Event;
 use sdl2::pixels::Color;
@@ -41,6 +41,8 @@ fn main() {
 		},
 	];
 	let mut camera_pos = Vector2::origin();
+	let mut node_motion_selection = None;
+	let mut node_motion_offset = None;			// The difference between the mouse pos and the position of the node it's moving
 
 	while running {
 		graphics.canvas.set_draw_color(Color::RGB(0x0b, 0x43, 0x78));
@@ -62,16 +64,24 @@ fn main() {
 		let canvas_size = graphics.canvas.output_size().unwrap();
 
 		// Mouse motion
-		if input.button_is(MouseButton::Left, InputState::Down) {
-			let mut collided = false;
-			for node in nodes.iter_mut() {
+		if input.button_is(MouseButton::Left, InputState::Pressed) {
+			node_motion_selection = None;
+			for (index, node) in nodes.iter().enumerate() {
 				if input.mouse_pos.collides(Rect::new(node.pos.x - camera_pos.x, node.pos.y - camera_pos.y, NODE_WIDTH, NODE_HEIGHT)) {
-					collided = true;
-					node.pos += input.mouse_motion;
+					node_motion_selection = Some(index);
+					node_motion_offset = Some(input.mouse_pos - node.pos);
 					break;
 				}
 			}
-			if !collided {
+		}
+		if input.button_is(MouseButton::Left, InputState::Down) {
+			if let Some(node_index) = node_motion_selection {
+				if input.key_is(Scancode::LCtrl, InputState::Up) {
+					nodes.get_mut(node_index).unwrap().pos = (input.mouse_pos - node_motion_offset.unwrap()) / Vector2::square(GRID_SIZE) * Vector2::square(GRID_SIZE);
+				} else {
+					nodes.get_mut(node_index).unwrap().pos = input.mouse_pos - node_motion_offset.unwrap();
+				}
+			} else {
 				camera_pos -= input.mouse_motion;
 			}
 		}
